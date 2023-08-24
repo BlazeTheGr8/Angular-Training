@@ -1,10 +1,11 @@
 import { Component, OnInit } from '@angular/core';
 import { IProduct } from './products';
+import { ProductService } from './product.service';
 
 @Component({
   selector: 'pm-products',
   templateUrl: './product-list.component.html',
-  styleUrls: ['./product-list.component.css']
+  styleUrls: ['./product-list.component.css'],
 })
 export class ProductListComonent implements OnInit {
   pageTitle: string = 'Product List';
@@ -13,41 +14,39 @@ export class ProductListComonent implements OnInit {
   showImage: boolean = false;
   private _listFilter: string = '';
   get listFilter(): string {
-    return this._listFilter
+    return this._listFilter;
   }
   set listFilter(value: string) {
     this._listFilter = value;
-    console.log("In setter:", value)
+    console.log('In setter:', value);
+    this.filteredProducts = this.performFilter(value);
   }
 
-  products: IProduct[] = [
-    {
-      productId: 1,
-      productName: 'Leaf Rake',
-      productCode: 'GDN-0011',
-      releaseDate: 'March 19, 2021',
-      description: 'Leaf rake with 48-inch wooden handle.',
-      price: 19.95,
-      starRating: 3.2,
-      imageUrl: 'assets/images/leaf_rake.png',
-    },
-    {
-      productId: 2,
-      productName: 'Garden Cart',
-      productCode: 'GDN-0023',
-      releaseDate: 'March 18, 2021',
-      description: '15 gallon capacity rolling garden cart',
-      price: 32.99,
-      starRating: 4.2,
-      imageUrl: 'assets/images/garden_cart.png',
-    },
-  ];
+  filteredProducts: IProduct[] = [];
+
+  products: IProduct[] = [];
+
+  constructor(private productService: ProductService) {
+
+  }
 
   toggleImage(): void {
-    this.showImage = !this.showImage
+    this.showImage = !this.showImage;
+  }
+
+  performFilter(filterBy: string): IProduct[] {
+    filterBy = filterBy.toLocaleLowerCase();
+    return this.products.filter((product: IProduct) => {
+      return product.productName.toLocaleLowerCase().includes(filterBy);
+    });
   }
 
   ngOnInit(): void {
-    this.listFilter = "cart"
+    this.products = this.productService.getProducts();
+    this.listFilter = 'cart';
+  }
+
+  onRatingClicked(message: string): void {
+    this.pageTitle = "Product List: " + message
   }
 }
